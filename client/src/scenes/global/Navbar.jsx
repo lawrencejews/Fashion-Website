@@ -12,6 +12,7 @@ import { setIsCartOpen } from '../../state';
 
 
 const Navbar = () => {
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const cart = useSelector((state) => state.cart.cart);
@@ -22,7 +23,7 @@ const Navbar = () => {
       alignItems='center'
       width='100%'
       height='60px'
-      backgroundColor='rgba(255,255,255,0.95'
+      backgroundColor='rgba(255, 255, 255, 0.95)'
       color='black'
       position='fixed'
       top='0'
@@ -36,6 +37,7 @@ const Navbar = () => {
         justifyContent='space-between'
         alignItems='center'
       >
+        {/* RIGHT TITLE BOX */}
         <Box
           onClick={() => navigate('/')}
           sx={{ '&:hover': { cursor: "pointer" } }}
@@ -43,6 +45,8 @@ const Navbar = () => {
         >
           FASHION SHOP
         </Box>
+
+        {/* LEFT ICON BOX */}
         <Box
           display='flex'
           justifyContent='space-between'
@@ -55,6 +59,8 @@ const Navbar = () => {
           <IconButton sx={{color: "black"}}>
             <PersonOutline />
           </IconButton>
+
+          {/* FOR SELECT ITEMS IN THE CART */}
           <Badge
             badgeContent={cart.length}
             color='secondary'

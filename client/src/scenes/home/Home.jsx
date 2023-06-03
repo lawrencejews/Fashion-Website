@@ -1,3 +1,5 @@
+import MainCarousal from "./MainCarousel";
+
 const Home = () => {
 
   return (
