@@ -1,6 +1,7 @@
 ## Fashion-Website
+This project is built to showcase strapi as headless server for a fashion webstore with react for the frontend.
 ### Frontend
-
+- Built with MUI, MUI-Icons and React
 ### Backend 
 - Server built with strapi headless content management service: `Content manager`,`content-type builder` and `Media library`.
 - Images uploaded from UnSplash
