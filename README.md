@@ -1,5 +1,5 @@
 ## Fashion-Website
-This project is built to showcase strapi as headless server for a fashion webstore with react for the frontend.
+This project is built to showcase strapi as headless server for a fashion webstore with react for the frontend. The website is built with React, Material UI, Stripe, Formik, Yup, Strapi and Redux Toolkit.
 ### Frontend
 - Built with MUI, MUI-Icons and React
 ### Backend 
