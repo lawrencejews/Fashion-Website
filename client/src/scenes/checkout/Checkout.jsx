@@ -4,9 +4,15 @@ import { Formik } from "formik";
 import { useState } from "react";
 import * as yup from "yup";
 import { shades } from "../../theme";
+import { loadStripe } from "@stripe/stripe-js";
 
 import Shipping from "./Shipping";
+import Payment from "./Payment";
 
+
+const stripePromise = loadStripe(
+  "pk_test_51NAyvZJSRg1tlBtraKONnKPU8RnnlYvlJggFMbheaQFiWWdUGJrKMc5weNINGpjTQ4syuX3TP7EwqO1nxi6NmCo300ieLaXJrz"
+);
 
 const initialValues = {
   billingAddress: {
@@ -34,7 +40,7 @@ const initialValues = {
   phoneNumber: ""
 }
 
-const checkoutScheme = [
+const checkoutSchema = [
   yup.object().shape({
     billingAddress: yup.object().shape({
       firstName: yup.string().required("required"),
@@ -60,7 +66,7 @@ const checkoutScheme = [
   }),
   yup.object().shape({
     email: yup.string().required("required"),
-    phoneNumber:yup.string().required("required")
+    phoneNumber: yup.string().required("required")
   }),
 ]
 
@@ -71,22 +77,55 @@ const Checkout = () => {
   const isFirstStep = activeStep === 0;
   const isSecondStep = activeStep === 1;
 
+  // Form Submission
+  const handleFormSubmit = async (values, actions) => {
+    setActiveStep(activeStep + 1);
 
-  const handleFormSubmit = async (value, actions) => {
-    setActiveStep(activeStep + 1)
+    // copies the billing address onto shipping address
+    if (isFirstStep && values.shippingAddress.isSameAddress) {
+      actions.setFieldValue("shippingAddress", {
+        ...values.billingAddress,
+        isSameAddress: true,
+      })
+    }
+
+    if (isSecondStep) {
+      makePayment(values)
+    }
+
+    actions.setTouched({})
   }
 
+  // Payment method
   async function makePayment(values) {
-    
-  }
+
+    const stripe = await stripePromise;
+    const requestBody = {
+      userName: [values.firstName, values.lastName].join(" "),
+      email: values.email,
+      products: cart.map(({ id, count }) => ({
+        id,
+        count
+      }))
+    }
+
+    const response = await fetch("http://localhost:1337/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody)
+    });
+  
+    const session = await response.json();
+    await stripe.redirectToCheckout({
+      sessionId: session.id
+    })
+  };
+
 
   return (
 
-    <Box
-      width="80%"
-      m="100px auto"
-    >
-      <Stepper>
+    <Box width="80%" m="100px auto">
+      <Stepper activeStep={activeStep} sx={{ m: "20px 0" }}>
         <Step>
           <StepLabel>Billings</StepLabel>
         </Step>
@@ -99,10 +138,10 @@ const Checkout = () => {
         <Formik
           onSubmit={handleFormSubmit}
           initialValues={initialValues}
-          validationSchema={checkoutScheme[activeStep] }
+          validationSchema={checkoutSchema[activeStep]}
         >
           {({
-            values, 
+            values,
             errors,
             touched,
             handleBlur,
@@ -114,13 +153,57 @@ const Checkout = () => {
               {isFirstStep && (
                 <Shipping
                   values={values}
-                  error={errors}
+                  errors={errors}
                   touched={touched}
                   handleBlur={handleBlur}
                   handleChange={handleChange}
                   setFieldValue={setFieldValue}
                 />
               )}
+              {isSecondStep && (
+                <Payment
+                  values={values}
+                  errors={errors}
+                  touched={touched}
+                  handleBlur={handleBlur}
+                  handleChange={handleChange}
+                  setFieldValue={setFieldValue}
+                />
+              )}
+              <Box display="flex" justifyContent="space-between" gap="50px">
+                {isSecondStep && (
+                  <Button
+                    fullWidth
+                    color="primary"
+                    variant="contained"
+                    sx={{
+                      backgroundColor: shades.primary[200],
+                      boxShadow: "none",
+                      color: "white",
+                      borderRadius: 0,
+                      padding: "15px 40px",
+                    }}
+                    onClick={() => setActiveStep(activeStep - 1)}
+                  >
+                    Back
+                  </Button>
+                )}
+                <Button
+                  fullWidth
+                  type="submit"
+                  color="primary"
+                  variant="contained"
+                  sx={{
+                    backgroundColor: shades.primary[400],
+                    boxShadow: "none",
+                    color: "white",
+                    borderRadius: 0,
+                    padding: "15px 40px",
+                  }}
+                >
+                  {isFirstStep ? "Next" : "Place Order"}
+                </Button>
+              </Box>
             </form>
           )}
         </Formik>

@@ -22,6 +22,7 @@ const MainCarousel = () => {
 
   return (
     <Carousel
+      autoPlay={true}
       infiniteLoop={true}
       showThumbs={false}
       showIndicators={false}
